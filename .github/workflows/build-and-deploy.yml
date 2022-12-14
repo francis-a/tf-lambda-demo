@@ -60,7 +60,7 @@ jobs:
           name: tf-lambda-demo
 
       - name: Set jav env
-        run: echo "TF_VAR_deployable_jar=$(echo $GITHUB_WORKSPACE)/jar/tf-lambda-demo-0-SNAPSHOT.jar" >> $GITHUB_ENV
+        run: echo "TF_VAR_deployable_jar=$(echo $GITHUB_WORKSPACE)/tf-lambda-demo/tf-lambda-demo-0-SNAPSHOT.jar" >> $GITHUB_ENV
 
       - name: Terraform init
         run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
