@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.helpscout.demo
 
 import com.amazonaws.services.lambda.runtime.Context
@@ -16,6 +18,7 @@ class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewa
     companion object : KLogging()
 
     override fun handleRequest(input: APIGatewayV2HTTPEvent, context: Context): APIGatewayV2HTTPResponse {
+        logger.info { input.toString() }
         TODO("Not yet implemented")
     }
 
