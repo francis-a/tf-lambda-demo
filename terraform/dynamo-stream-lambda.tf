@@ -31,6 +31,15 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
           "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.messages_dynamo_table.arn
+      },
+      {
+        Effect : "Allow"
+        # Send a message to the DLQ
+        Action = [
+          "sqs:SendMessage",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = aws_sqs_queue.dynamo_stream_dlq.arn
       }
     ]
   })
@@ -55,16 +64,7 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
 
 resource "aws_sqs_queue" "dynamo_stream_dlq" {
   name = "${local.name}-dynamo-stream-dlq"
-  redrive_allow_policy = jsonencode({
-    redrivePermission = "byQueue",
-    # terraform bug, need to create the arn manually for now
-    # https://github.com/hashicorp/terraform-provider-aws/issues/22577
-    sourceQueueArns = [
-      "arn:aws:sqs:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_aws_caller.account_id}:${local.name}-message-queue"
-    ]
-  })
 }
-
 
 resource "aws_lambda_event_source_mapping" "dynamo_stream_event_mapping" {
   function_name                      = aws_lambda_function.dynamo_stream_lambda.arn
