@@ -18,7 +18,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-east-1"
+  region = "us-east-1"
   #  AWS profile to run this under
   profile = var.aws_profile
   #  Tags are applied to all resources in the stack
@@ -41,7 +41,7 @@ resource "aws_resourcegroups_group" "lambda_demo" {
   resource_query {
     query = jsonencode({
       ResourceTypeFilters = ["AWS::AllSupported"]
-      TagFilters          = [
+      TagFilters = [
         {
           Key    = "Service"
           Values = [var.stack_name]
