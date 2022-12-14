@@ -4,6 +4,15 @@ resource "aws_apigatewayv2_api" "api_gateway" {
   protocol_type = "HTTP"
 }
 
+# Define the integration between the Lambda and API
+# This configures API Gateway to the Lambda defined below
+resource "aws_apigatewayv2_integration" "api_gateway_integration" {
+  api_id                 = aws_apigatewayv2_api.api_gateway.id
+  payload_format_version = "2.0"
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.api_gateway_lambda.invoke_arn
+}
+
 ## Logs
 # These log groups will be created automatically by AWS
 # But managing them in Terraform will allow us to control properties such as the retention period
