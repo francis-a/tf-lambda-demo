@@ -62,9 +62,7 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   filename         = var.deployable_jar
   memory_size      = 512
   timeout          = 10
-  snap_start {
-    apply_on = "PublishedVersions"
-  }
+
 
 }
 
