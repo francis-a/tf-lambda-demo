@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    key            = "tf/${var.stack_name}"
+    key            = "tf/tf-lambda-demo"
     region         = "us-east-1"
-    bucket         = "${var.stack_name}-terraform-state"
-    dynamodb_table = "${var.stack_name}-terraform-state"
+    bucket         = "tf-lambda-demo-terraform-state"
+    dynamodb_table = "tf-lambda-demo-terraform-state"
     encrypt        = false
   }
 }
