@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key     = "tf.state"
+    key     = "tf-lambda-demo.state"
     region  = "us-east-1"
     encrypt = false
   }
@@ -32,7 +32,7 @@ locals {
 }
 
 ## Resource group for organization
-resource "aws_resourcegroups_group" "lambda_demo" {
+resource "aws_resourcegroups_group" "tf-lambda-demo" {
   name = local.name
   resource_query {
     query = jsonencode({
