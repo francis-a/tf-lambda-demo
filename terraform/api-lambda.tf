@@ -53,7 +53,7 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   function_name = "${local.name}-api"
   role          = aws_iam_role.api_lambda_execution_role.arn
   runtime       = "java11"
-  architectures = ["x86_64"] # Required for snapshot
+  architectures = ["x86_64"] # Required for snap_start
   #  Fully qualified path for the handler
   #  When this class implements RequestHandler no method name is required
   #  Requests are handled by ApiGatewayRequestHandler::handleRequest
@@ -62,7 +62,14 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   filename    = var.deployable_jar
   memory_size = 512
   timeout     = 10
-
+  snap_start {
+    apply_on = "PublishedVersions"
+  }
+  environment {
+    variables = {
+      DYNAMO_TABLE_NAME = aws_dynamodb_table.messages_dynamo_table.name
+    }
+  }
 }
 
 # Self managed log group

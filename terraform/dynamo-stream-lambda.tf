@@ -18,11 +18,30 @@ resource "aws_iam_role" "dynamo_stream_lambda_execution_role" {
   path = "/"
 }
 
+resource "aws_iam_role_policy" "dynamo_stream_policy" {
+  role = aws_iam_role.dynamo_stream_lambda_execution_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect : "Allow"
+        # Only has permission to read and save an item
+        Action = [
+          "dynamodb:ListStreams",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = aws_dynamodb_table.messages_dynamo_table.arn
+      }
+    ]
+  })
+}
+
+
 resource "aws_lambda_function" "dynamo_stream_lambda" {
   function_name = "${local.name}-dynamo-stream"
   role          = aws_iam_role.dynamo_stream_lambda_execution_role.arn
   runtime       = "java11"
-  architectures = ["arm64"] # Required for snapshot
+  architectures = ["arm64"] # Arm is a bit cheaper and we don't need snap_start
   #  Fully qualified path for the handler
   #  When this class implements RequestHandler no method name is required
   #  Requests are handled by DynamoStreamRequestHandler::handleRequest
