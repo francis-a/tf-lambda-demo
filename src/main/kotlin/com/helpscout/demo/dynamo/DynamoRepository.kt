@@ -34,6 +34,9 @@ class DynamoRepository(
         body = this.messageContent
     )
 
+    /**
+     * Table name can be overwritten in mapper config
+     */
     @DynamoDBTable(tableName = "local.messages")
     data class DynamoDBMessage(
         @DynamoDBHashKey(attributeName = "message_id")
