@@ -4,6 +4,4 @@ variable "stack_name" {
 variable "stack_environment" {
   default = "dev"
 }
-variable "aws_profile" {
-  default = "default"
-}
+

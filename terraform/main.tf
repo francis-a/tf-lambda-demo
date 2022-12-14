@@ -17,8 +17,6 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-  #  AWS profile to run this under
-  profile = var.aws_profile
   #  Tags are applied to all resources in the stack
   #  These tags are used
   default_tags {
