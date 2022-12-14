@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key            = "tf/tf-lambda-demo"
+    key            = "tf.state"
     region         = "us-east-1"
     bucket         = "tf-lambda-demo-terraform-state"
     dynamodb_table = "tf-lambda-demo-terraform-state"
