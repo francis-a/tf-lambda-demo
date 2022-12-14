@@ -28,8 +28,8 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   #  Requests are handled by ApiGatewayRequestHandler::handleRequest
   handler = "com.helpscout.demo.ApiGatewayRequestHandler"
   #  Terraform will take care of uploading the local jar and deploying it to Lambda
-  filename         = "/jar/tf-lambda-demo-0-SNAPSHOT.jar"
-  source_code_hash = base64sha256(filebase64("/jar/tf-lambda-demo-0-SNAPSHOT.jar"))
+  filename         = var.lambda_jar
+  source_code_hash = base64sha256(filebase64(var.lambda_jar))
   memory_size      = 512
   timeout          = 10
 
