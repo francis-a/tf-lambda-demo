@@ -12,6 +12,7 @@ env:
   BUCKET_TF_STATE: tf-lambda-demo-terraform-state
 
 jobs:
+
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest
