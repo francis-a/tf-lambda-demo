@@ -15,6 +15,7 @@ dependencies {
     implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.2")
     implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.351")
+    implementation("com.amazonaws:aws-lambda-java-events-sdk-transformer:3.1.0")
 
     implementation("org.slf4j:slf4j-simple:2.0.5")
     implementation("io.github.microutils:kotlin-logging:3.0.4")

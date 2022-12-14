@@ -2,11 +2,12 @@ package com.helpscout.demo.dynamo
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
 import com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue
+import com.amazonaws.services.lambda.runtime.events.transformers.v1.dynamodb.DynamodbAttributeValueTransformer
 import com.helpscout.demo.CreateMessageRequest
 import com.helpscout.demo.GetMessageResponse
 import com.helpscout.demo.StatusCodeException
 
-class DynamoRepository(
+class MessageService(
     private val dynamoDBMapper: DynamoDBMapper
 ) {
 
@@ -26,14 +27,29 @@ class DynamoRepository(
         return message.fromDynamoModel()
     }
 
-    fun updateMessage(messageId: String, newContent: String): GetMessageResponse {
-        if (newContent == "That's an error")
+    fun changeMessageIfNeeded(newImage: GetMessageResponse, oldImage: GetMessageResponse) {
+        val textToErrorOn = "That's a bad joke"
+        if (newImage.body == textToErrorOn) {
+            throw StatusCodeException(statusCode = 500, error = "Whoops")
+        }
+        val textToCheck = "Knock knock"
+        if (oldImage.body != textToCheck && newImage.body == textToCheck) {
             dynamoDBMapper.save(
                 DynamoDBMessage(
-                    messageId, messageContent = newContent
+                    newImage.messageId,
+                    messageContent = "Who's there?"
                 )
             )
-        return getMessage(messageId)
+        }
+    }
+
+    fun covertFromAttributes(attributeValueMap: Map<String, AttributeValue>): GetMessageResponse {
+        val v1AttributeValues = attributeValueMap.mapValues { (_, value) ->
+            DynamodbAttributeValueTransformer.toAttributeValueV1(value)
+        }
+        return dynamoDBMapper
+            .marshallIntoObject(DynamoDBMessage::class.java, v1AttributeValues)
+            .fromDynamoModel()
     }
 
     private fun CreateMessageRequest.toDynamoModel(): DynamoDBMessage = DynamoDBMessage(
