@@ -70,6 +70,7 @@ resource "aws_apigatewayv2_route" "api_get_message_route" {
   target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
 
+# return the API URL, custom domains are also possible
 output "api_gateway_url" {
   description = "API Gateway URL"
   value       = aws_apigatewayv2_api.api_gateway.api_endpoint

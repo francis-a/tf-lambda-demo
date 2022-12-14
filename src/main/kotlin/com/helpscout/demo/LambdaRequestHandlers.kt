@@ -59,7 +59,7 @@ class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewa
         "POST /message" -> 201 to messageService.saveMessage(toCreateMessageRequest(this.body))
         "GET /message/{messageId}" -> 200 to messageService.getMessage(this.pathParameters.getValue("messageId"))
         else -> throw StatusCodeException(404, "Route $routeKey not found")
-    }
+    }.also { logger.info { this.routeKey } }
 
     private fun toCreateMessageRequest(body: String): CreateMessageRequest = try {
         objectMapper.readValue(body)
