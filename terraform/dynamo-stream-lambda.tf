@@ -25,15 +25,22 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
     Statement = [
       {
         Effect : "Allow"
-        # Has permission to read the stream and update existing items
+        # Has permission to update items
         Action = [
           "dynamodb:UpdateItem",
+        ]
+        Resource = aws_dynamodb_table.messages_dynamo_table.arn
+      },
+      {
+        Effect : "Allow"
+        # Has permission to read the stream
+        Action = [
           "dynamodb:ListStreams",
           "dynamodb:GetRecords",
           "dynamodb:GetShardIterator",
           "dynamodb:DescribeStream"
         ]
-        Resource = aws_dynamodb_table.messages_dynamo_table.arn
+        Resource = aws_dynamodb_table.messages_dynamo_table.stream_arn
       },
       {
         Effect : "Allow"
