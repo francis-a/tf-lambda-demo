@@ -23,7 +23,7 @@ resource "aws_apigatewayv2_stage" "api_gateway_v1_stage" {
   #  https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-logging-variables.html
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_access_logs.arn
-    format          = jsonencode({
+    format = jsonencode({
       httpMethod              = "$context.httpMethod"
       integrationStatus       = "$context.integrationStatus"
       dataProcessed           = "$context.dataProcessed"
