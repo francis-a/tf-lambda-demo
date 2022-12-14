@@ -25,10 +25,13 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
     Statement = [
       {
         Effect : "Allow"
-        # Only has permission to read and save an item
+        # Has permission to read the stream and update existing items
         Action = [
+          "dynamodb:UpdateItem",
           "dynamodb:ListStreams",
-          "dynamodb:UpdateItem"
+          "dynamodb:GetRecords",
+          "dynamodb:GetShardIterator",
+          "dynamodb:DescribeStream"
         ]
         Resource = aws_dynamodb_table.messages_dynamo_table.arn
       },
@@ -36,8 +39,7 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
         Effect : "Allow"
         # Send a message to the DLQ
         Action = [
-          "sqs:SendMessage",
-          "dynamodb:UpdateItem"
+          "sqs:SendMessage"
         ]
         Resource = aws_sqs_queue.dynamo_stream_dlq.arn
       }
