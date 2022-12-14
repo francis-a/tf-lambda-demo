@@ -45,7 +45,7 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   memory_size      = 512
   timeout          = 10
   snap_start {
-    apply_on = PublishedVersions
+    apply_on = "PublishedVersions"
   }
 
 }
