@@ -1,6 +1,7 @@
 package com.helpscout.demo.dynamo
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*
+import com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue
 import com.helpscout.demo.CreateMessageRequest
 import com.helpscout.demo.GetMessageResponse
 import com.helpscout.demo.StatusCodeException
@@ -23,6 +24,16 @@ class DynamoRepository(
             )
 
         return message.fromDynamoModel()
+    }
+
+    fun updateMessage(messageId: String, newContent: String): GetMessageResponse {
+        if (newContent == "That's an error")
+            dynamoDBMapper.save(
+                DynamoDBMessage(
+                    messageId, messageContent = newContent
+                )
+            )
+        return getMessage(messageId)
     }
 
     private fun CreateMessageRequest.toDynamoModel(): DynamoDBMessage = DynamoDBMessage(

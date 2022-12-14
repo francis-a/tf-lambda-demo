@@ -85,7 +85,7 @@ class DynamoStreamRequestHandler : RequestHandler<DynamodbStreamRecord, Unit> {
     companion object : KLogging()
 
     override fun handleRequest(input: DynamodbStreamRecord, context: Context) {
-        TODO("Not yet implemented")
+        logger.info { input }
     }
 }
 
