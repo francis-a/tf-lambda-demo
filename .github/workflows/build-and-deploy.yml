@@ -58,12 +58,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tf-lambda-demo
-          path: jar/tf-lambda-demo-0-SNAPSHOT.jar
 
       - name: Set jav env
         run: echo "TF_VAR_deployable_jar=$(echo $GITHUB_WORKSPACE)/jar/tf-lambda-demo-0-SNAPSHOT.jar" >> $GITHUB_ENV
-      - name: Test
-        run: echo TF_VAR_deployable_jar
 
       - name: Terraform init
         run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"

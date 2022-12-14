@@ -6,5 +6,5 @@ variable "stack_environment" {
 }
 
 variable "deployable_jar" {
-  default = "jar/tf-lambda-demo-0-SNAPSHOT.jar"
+  default = "build/libs/tf-lambda-demo-0-SNAPSHOT.jar"
 }
