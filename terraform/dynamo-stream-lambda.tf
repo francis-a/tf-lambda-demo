@@ -52,3 +52,31 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
   timeout     = 10
 
 }
+
+resource "aws_sqs_queue" "dynamo_stream_dlq" {
+  name = "${local.name}-dynamo-stream-dlq"
+  redrive_allow_policy = jsonencode({
+    redrivePermission = "byQueue",
+    # terraform bug, need to create the arn manually for now
+    # https://github.com/hashicorp/terraform-provider-aws/issues/22577
+    sourceQueueArns = [
+      "arn:aws:sqs:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_aws_caller.account_id}:${local.name}-message-queue"
+    ]
+  })
+}
+
+
+resource "aws_lambda_event_source_mapping" "dynamo_stream_event_mapping" {
+  function_name                      = aws_lambda_function.dynamo_stream_lambda.arn
+  event_source_arn                   = aws_dynamodb_table.messages_dynamo_table.stream_arn
+  starting_position                  = "TRIM_HORIZON"
+  batch_size                         = 100
+  bisect_batch_on_function_error     = true
+  maximum_batching_window_in_seconds = 5
+  maximum_retry_attempts             = 3
+  destination_config {
+    on_failure {
+      destination_arn = aws_sqs_queue.dynamo_stream_dlq.arn
+    }
+  }
+}
