@@ -6,6 +6,7 @@ import com.amazonaws.services.lambda.runtime.events.transformers.v1.dynamodb.Dyn
 import com.helpscout.demo.ModifyMessageRequest
 import com.helpscout.demo.GetMessageResponse
 import com.helpscout.demo.StatusCodeException
+import java.util.UUID
 
 class MessageService(
     private val dynamoDBMapper: DynamoDBMapper
@@ -46,7 +47,7 @@ class MessageService(
         if (oldImage.body != textToCheck && newImage.body == textToCheck) {
             dynamoDBMapper.save(
                 DynamoDBMessage(
-                    newImage.messageId,
+                    messageId = newImage.messageId,
                     messageContent = "Who's there?"
                 )
             )
@@ -77,8 +78,7 @@ class MessageService(
     @DynamoDBTable(tableName = "local.messages")
     data class DynamoDBMessage(
         @DynamoDBHashKey(attributeName = "message_id")
-        @DynamoDBGeneratedUuid(DynamoDBAutoGenerateStrategy.CREATE)
-        var messageId: String = "",
+        var messageId: String = UUID.randomUUID().toString(),
         @DynamoDBAttribute(attributeName = "content")
         var messageContent: String = ""
     )
