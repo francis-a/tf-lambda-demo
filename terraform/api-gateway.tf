@@ -61,12 +61,12 @@ resource "aws_apigatewayv2_stage" "api_gateway_v1_stage" {
 # routes
 resource "aws_apigatewayv2_route" "api_post_message_route" {
   api_id    = aws_apigatewayv2_api.api_gateway.id
-  route_key = "POST /create"
+  route_key = "POST /message"
   target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
 resource "aws_apigatewayv2_route" "api_get_message_route" {
   api_id    = aws_apigatewayv2_api.api_gateway.id
-  route_key = "GET /get/{messageId}"
+  route_key = "GET /message/{messageId}"
   target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
 
