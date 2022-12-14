@@ -10,7 +10,7 @@ resource "aws_lambda_permission" "api_gateway_invoke_permission" {
   source_arn    = "arn:aws:execute-api:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_aws_caller.account_id}:*"
 }
 
-resource "aws_iam_role" "lambda_execution_role" {
+resource "aws_iam_role" "api_lambda_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -30,11 +30,30 @@ resource "aws_iam_role" "lambda_execution_role" {
   path = "/"
 }
 
+resource "aws_iam_role_policy" "api_lambda_policy" {
+  role   = aws_iam_role.api_lambda_execution_role.id
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect : "Allow"
+        # Only has permission to read and save an item
+        Action = [
+          "dynamodb:Query",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem"
+        ]
+        Resource = aws_dynamodb_table.messages_dynamo_table.arn
+      }
+    ]
+  })
+}
+
 resource "aws_lambda_function" "api_gateway_lambda" {
   function_name = "${local.name}-api"
-  role          = aws_iam_role.lambda_execution_role.arn
+  role          = aws_iam_role.api_lambda_execution_role.arn
   runtime       = "java11"
-  architectures = ["x86"] # Required for snapshot
+  architectures = ["x86_64"] # Required for snapshot
   #  Fully qualified path for the handler
   #  When this class implements RequestHandler no method name is required
   #  Requests are handled by ApiGatewayRequestHandler::handleRequest
