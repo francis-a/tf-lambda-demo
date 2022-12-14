@@ -1,6 +1,6 @@
 ## API Gateway
 resource "aws_apigatewayv2_api" "api_gateway" {
-  name          = "${var.stack_environment}-api-gateway"
+  name          = "${local.name}-api"
   protocol_type = "HTTP"
 }
 

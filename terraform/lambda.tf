@@ -1,3 +1,15 @@
+# Used to fetch AWS account credentials for where this service is deployed
+data "aws_region" "current_region" {}
+data "aws_caller_identity" "current_aws_caller" {}
+# Grant permission for the gateway to invoke the lambda
+# It is restricted to our account based off the source_arn
+resource "aws_lambda_permission" "api_gateway_invoke_permission" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.api_gateway_lambda.arn
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current_region.name}:${data.aws_caller_identity.current_aws_caller.account_id}:*"
+}
+
 resource "aws_iam_role" "lambda_execution_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
