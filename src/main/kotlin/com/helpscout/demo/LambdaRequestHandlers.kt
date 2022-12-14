@@ -56,8 +56,8 @@ class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewa
     }
 
     private fun APIGatewayV2HTTPEvent.handle(): Pair<Int, Any> = when (this.routeKey) {
-        "POST /create" -> 201 to messageService.saveMessage(toCreateMessageRequest(this.body))
-        "GET /get/{messageId}" -> 200 to messageService.getMessage(this.pathParameters.getValue("messageId"))
+        "POST /message" -> 201 to messageService.saveMessage(toCreateMessageRequest(this.body))
+        "GET /message/{messageId}" -> 200 to messageService.getMessage(this.pathParameters.getValue("messageId"))
         else -> throw StatusCodeException(404, "Route $routeKey not found")
     }
 
