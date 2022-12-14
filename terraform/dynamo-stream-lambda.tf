@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
         Effect : "Allow"
         # Has permission to update items
         Action = [
-          "dynamodb:UpdateItem",
+          "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.messages_dynamo_table.arn
       },
@@ -68,6 +68,12 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
   source_code_hash = filebase64sha256(var.deployable_jar)
   memory_size      = 512
   timeout          = 30
+
+  environment {
+    variables = {
+      DYNAMO_TABLE_NAME = aws_dynamodb_table.messages_dynamo_table.name
+    }
+  }
 }
 
 resource "aws_sqs_queue" "dynamo_stream_dlq" {

@@ -18,10 +18,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.helpscout.demo.dynamo.MessageService
 import mu.KLogging
 
-/**
- * Entry point for invocations coming from API Gateway.
- * Request and response model is provided by aws-lambda-java-events.
- */
+
 private val messageService = MessageService(
     DynamoDBMapper(
         AmazonDynamoDBClient.builder().build(),
@@ -35,6 +32,10 @@ private val messageService = MessageService(
     )
 )
 
+/**
+ * Entry point for invocations coming from API Gateway.
+ * Request and response model is provided by aws-lambda-java-events.
+ */
 class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     companion object : KLogging() {
