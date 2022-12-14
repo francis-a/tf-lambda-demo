@@ -30,7 +30,7 @@ jobs:
         name: Save jar
         with:
           name: tf-lambda-demo
-          path: /jar/tf-lambda-demo-0-SNAPSHOT.jar
+          path: build/libs/tf-lambda-demo-0-SNAPSHOT.jar
 
   terraform:
     name: "Terraform"
@@ -53,7 +53,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tf-lambda-demo
-          path: build/libs/tf-lambda-demo-0-SNAPSHOT.jar
+          path: /jar/tf-lambda-demo-0-SNAPSHOT.jar
       - name: Terraform init
         run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
       - name: Terraform format
