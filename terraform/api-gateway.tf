@@ -27,6 +27,8 @@ resource "aws_apigatewayv2_stage" "api_gateway_v1_stage" {
   auto_deploy = "true"
   default_route_settings {
     detailed_metrics_enabled = true
+    throttling_rate_limit    = 100
+    throttling_burst_limit   = 100
   }
   #  Configure how and where we want to publish access logs
   #  https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-logging-variables.html

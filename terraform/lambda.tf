@@ -44,7 +44,6 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   source_code_hash = base64sha256(filebase64(var.deployable_jar))
   memory_size      = 512
   timeout          = 10
-  snap_start       = true
 
 }
 
