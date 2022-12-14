@@ -34,6 +34,7 @@ resource "aws_lambda_function" "api_gateway_lambda" {
   function_name = "${local.name}-api"
   role          = aws_iam_role.lambda_execution_role.arn
   runtime       = "java11"
+  architectures = ["x86"] # Required for snapshot
   #  Fully qualified path for the handler
   #  When this class implements RequestHandler no method name is required
   #  Requests are handled by ApiGatewayRequestHandler::handleRequest
