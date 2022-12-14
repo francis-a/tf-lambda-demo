@@ -68,7 +68,7 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
   filename         = var.deployable_jar
   source_code_hash = filebase64sha256(var.deployable_jar)
   memory_size      = 512
-  timeout          = 10
+  timeout          = 30
 
 }
 
