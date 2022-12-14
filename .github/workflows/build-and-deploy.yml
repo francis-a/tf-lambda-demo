@@ -30,7 +30,7 @@ jobs:
         name: Save jar
         with:
           name: tf-lambda-demo
-          path: tf-lambda-demo-0-SNAPSHOT.jar
+          path: /jar/tf-lambda-demo-0-SNAPSHOT.jar
 
   terraform:
     name: "Terraform"
