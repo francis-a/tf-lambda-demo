@@ -4,6 +4,3 @@ variable "stack_name" {
 variable "stack_environment" {
   default = "dev"
 }
-variable "lambda_jar" {
-  default = "./tf-lambda-demo-0-SNAPSHOT.jar"
-}
