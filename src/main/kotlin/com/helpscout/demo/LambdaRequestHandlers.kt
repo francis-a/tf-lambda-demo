@@ -12,6 +12,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent
 import com.amazonaws.services.lambda.runtime.events.models.dynamodb.StreamRecord
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.helpscout.demo.dynamo.MessageService
@@ -56,24 +57,33 @@ class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewa
     }
 
     private fun APIGatewayV2HTTPEvent.handle(): Pair<Int, Any> = when (this.routeKey) {
-        "POST /message" -> 201 to messageService.saveMessage(toCreateMessageRequest(this.body))
+        "POST /message" -> 201 to messageService.saveMessage(toMessageRequest(this.body))
         "GET /message/{messageId}" -> 200 to messageService.getMessage(this.pathParameters.getValue("messageId"))
-        else -> throw StatusCodeException(404, "Route $routeKey not found")
-    }.also { logger.info { this.routeKey } }
+        "PUT /message/{messageId}" -> 204 to messageService.updateMessage(
+            this.pathParameters.getValue("messageId"),
+            toMessageRequest(this.body)
+        )
 
-    private fun toCreateMessageRequest(body: String): CreateMessageRequest = try {
+        else -> throw StatusCodeException(404, "Route $routeKey not found")
+    }
+
+    private fun toMessageRequest(body: String): ModifyMessageRequest = try {
         objectMapper.readValue(body)
     } catch (e: Exception) {
         throw StatusCodeException(400, "Invalid request body", e)
     }
 
 
-    private fun toApiGatewayResponse(statusCode: Int, body: Any): APIGatewayV2HTTPResponse =
+    private fun toApiGatewayResponse(statusCode: Int, body: Any?): APIGatewayV2HTTPResponse =
         APIGatewayV2HTTPResponse.builder()
             .withStatusCode(statusCode)
-            .withBody(objectMapper.writeValueAsString(body))
+            .withBody(objectMapper.writeValueAsStringOrNull(body))
             .withHeaders(mapOf("Content-Type" to "application/json"))
             .build()
+
+    private fun ObjectMapper.writeValueAsStringOrNull(body: Any?): String? = body?.let {
+        this.writeValueAsString(it)
+    }
 
 }
 

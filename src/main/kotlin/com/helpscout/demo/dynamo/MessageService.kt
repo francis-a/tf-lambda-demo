@@ -3,7 +3,7 @@ package com.helpscout.demo.dynamo
 import com.amazonaws.services.dynamodbv2.datamodeling.*
 import com.amazonaws.services.lambda.runtime.events.models.dynamodb.AttributeValue
 import com.amazonaws.services.lambda.runtime.events.transformers.v1.dynamodb.DynamodbAttributeValueTransformer
-import com.helpscout.demo.CreateMessageRequest
+import com.helpscout.demo.ModifyMessageRequest
 import com.helpscout.demo.GetMessageResponse
 import com.helpscout.demo.StatusCodeException
 
@@ -11,8 +11,8 @@ class MessageService(
     private val dynamoDBMapper: DynamoDBMapper
 ) {
 
-    fun saveMessage(createMessageRequest: CreateMessageRequest): GetMessageResponse {
-        val dynamoRequest = createMessageRequest.toDynamoModel()
+    fun saveMessage(modifyMessageRequest: ModifyMessageRequest): GetMessageResponse {
+        val dynamoRequest = modifyMessageRequest.toDynamoModel()
         dynamoDBMapper.save(dynamoRequest)
         return getMessage(dynamoRequest.messageId)
     }
@@ -25,6 +25,16 @@ class MessageService(
             )
 
         return message.fromDynamoModel()
+    }
+
+    fun updateMessage(messageId: String, modifyMessageRequest: ModifyMessageRequest) {
+        val message = getMessage(messageId)
+        dynamoDBMapper.save(
+            DynamoDBMessage(
+                messageId = message.messageId,
+                messageContent = modifyMessageRequest.body
+            )
+        )
     }
 
     fun changeMessageIfNeeded(newImage: GetMessageResponse, oldImage: GetMessageResponse) {
@@ -52,7 +62,7 @@ class MessageService(
             .fromDynamoModel()
     }
 
-    private fun CreateMessageRequest.toDynamoModel(): DynamoDBMessage = DynamoDBMessage(
+    private fun ModifyMessageRequest.toDynamoModel(): DynamoDBMessage = DynamoDBMessage(
         messageContent = this.body
     )
 

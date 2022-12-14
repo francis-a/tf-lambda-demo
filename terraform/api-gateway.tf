@@ -64,9 +64,16 @@ resource "aws_apigatewayv2_route" "api_post_message_route" {
   route_key = "POST /message"
   target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
+
 resource "aws_apigatewayv2_route" "api_get_message_route" {
   api_id    = aws_apigatewayv2_api.api_gateway.id
   route_key = "GET /message/{messageId}"
+  target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
+}
+
+resource "aws_apigatewayv2_route" "api_update_message_route" {
+  api_id    = aws_apigatewayv2_api.api_gateway.id
+  route_key = "PUT /message/{messageId}"
   target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
 

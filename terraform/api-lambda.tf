@@ -37,11 +37,12 @@ resource "aws_iam_role_policy" "api_lambda_policy" {
     Statement = [
       {
         Effect : "Allow"
-        # Only has permission to read and save an item
+        # Only has permission to read, update and save an item
         Action = [
           "dynamodb:Query",
           "dynamodb:GetItem",
-          "dynamodb:PutItem"
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
         ]
         Resource = aws_dynamodb_table.messages_dynamo_table.arn
       }

@@ -54,7 +54,6 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
   })
 }
 
-
 resource "aws_lambda_function" "dynamo_stream_lambda" {
   function_name = "${local.name}-dynamo-stream"
   role          = aws_iam_role.dynamo_stream_lambda_execution_role.arn
@@ -69,7 +68,6 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
   source_code_hash = filebase64sha256(var.deployable_jar)
   memory_size      = 512
   timeout          = 30
-
 }
 
 resource "aws_sqs_queue" "dynamo_stream_dlq" {
