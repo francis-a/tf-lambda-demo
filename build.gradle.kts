@@ -9,12 +9,13 @@ version = "0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://s3-us-west-2.amazonaws.com/dynamodb-local/release")
 }
 
 dependencies {
     implementation("com.amazonaws:aws-lambda-java-events:3.11.0")
     implementation("com.amazonaws:aws-lambda-java-core:1.2.2")
-    implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.351")
+    implementation("com.amazonaws:aws-java-sdk-dynamodb:1.12.364")
     implementation("com.amazonaws:aws-lambda-java-events-sdk-transformer:3.1.0")
 
     implementation("org.slf4j:slf4j-simple:2.0.5")
@@ -28,11 +29,25 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.1")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("com.amazonaws:DynamoDBLocal:1.15.0")
+
 }
 
-tasks.test {
-    useJUnitPlatform()
+val copyDynamoDbNativeLibs by tasks.creating(Copy::class) {
+    from(configurations.testRuntimeClasspath) {
+        include("*.dylib")
+        include("*.so")
+        include("*.dll")
+    }
+    into("$buildDir/libs")
 }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    dependsOn.add(copyDynamoDbNativeLibs)
+    doFirst { systemProperty("java.library.path", "$buildDir/libs") }
+}
+
 
 tasks.withType<JavaCompile> {
     sourceCompatibility = "17"
@@ -45,7 +60,7 @@ tasks.withType<KotlinCompile> {
 }
 
 // build jar with all deps for deployment
-tasks.jar {
+tasks.withType<Jar> {
     val dependencies = configurations
         .runtimeClasspath
         .get()

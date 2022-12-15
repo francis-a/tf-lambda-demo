@@ -3,9 +3,6 @@
 package com.helpscout.demo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.TableNameOverride.withTableNameReplacement
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent
@@ -18,33 +15,40 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.helpscout.demo.dynamo.MessageService
 import mu.KLogging
 
+/**
+ * Decouple the services from the Lambda handler for easier testing
+ */
+interface ServiceBootstrap {
+    val messageService: MessageService
+}
 
 /**
- * Shared message service for both Lambda handlers
+ * Provides the default message service as a static var
+ * This will avoid creating a new MessageService per Lambda invocation
  */
-private val messageService = MessageService(
-    DynamoDBMapper(
+object StaticServiceBootstrap: ServiceBootstrap {
+    @JvmStatic
+    private val backingMessageService = MessageService(
         AmazonDynamoDBClient.builder().build(),
-        DynamoDBMapperConfig.builder()
-            .withTableNameOverride(
-                withTableNameReplacement(
-                    System.getenv("DYNAMO_TABLE_NAME")
-                )
-            )
-            .build()
+        System.getenv("DYNAMO_TABLE_NAME")
     )
-)
+
+    override val messageService: MessageService = backingMessageService
+}
 
 /**
  * Entry point for invocations coming from API Gateway.
  * Request and response model is provided by aws-lambda-java-events.
  */
-class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+class ApiGatewayRequestHandler(
+    serviceBootstrap: ServiceBootstrap = StaticServiceBootstrap
+) : RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     companion object : KLogging() {
         private val objectMapper = jacksonObjectMapper()
-
     }
+
+    private val messageService = serviceBootstrap.messageService
 
     /**
      * Lambda entry point, the request payload if present is passed in APIGatewayV2HTTPEvent.
@@ -120,9 +124,13 @@ class ApiGatewayRequestHandler : RequestHandler<APIGatewayV2HTTPEvent, APIGatewa
  * No response is needed, if the Lambda finishes without an execution
  * error the consumed payload is checkpointed.
  */
-class DynamoStreamRequestHandler : RequestHandler<DynamodbEvent, Unit> {
+class DynamoStreamRequestHandler(
+    serviceBootstrap: ServiceBootstrap = StaticServiceBootstrap
+) : RequestHandler<DynamodbEvent, Unit> {
 
     companion object : KLogging()
+
+    private val messageService = serviceBootstrap.messageService
 
     override fun handleRequest(input: DynamodbEvent, context: Context) = runCatching {
         input.records.mapNotNull {
@@ -136,6 +144,10 @@ class DynamoStreamRequestHandler : RequestHandler<DynamodbEvent, Unit> {
         logger.error(it) { "Error processing records" }
     }.getOrThrow()
 
+    /**
+     * Even when processing new and old records we don't always have both.
+     * New and old records are only available on updates.
+     */
     private fun StreamRecord.newAndOldImageAttributes() = when {
         newImage != null && oldImage != null -> newImage to oldImage
         else -> null
