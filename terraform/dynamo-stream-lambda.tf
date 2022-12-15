@@ -53,7 +53,7 @@ resource "aws_iam_role_policy" "dynamo_stream_policy" {
     ]
   })
 }
-
+# This Lambda will consume from the DynamoDB stream
 resource "aws_lambda_function" "dynamo_stream_lambda" {
   function_name = "${local.name}-dynamo-stream"
   role          = aws_iam_role.dynamo_stream_lambda_execution_role.arn
@@ -76,21 +76,35 @@ resource "aws_lambda_function" "dynamo_stream_lambda" {
   }
 }
 
+# SQS queue used for a DLQ
 resource "aws_sqs_queue" "dynamo_stream_dlq" {
   name = "${local.name}-dynamo-stream-dlq"
 }
 
+# Map the Lambda defined above to the Dynamo stream
 resource "aws_lambda_event_source_mapping" "dynamo_stream_event_mapping" {
-  function_name                      = aws_lambda_function.dynamo_stream_lambda.arn
-  event_source_arn                   = aws_dynamodb_table.messages_dynamo_table.stream_arn
-  starting_position                  = "TRIM_HORIZON"
+  function_name     = aws_lambda_function.dynamo_stream_lambda.arn
+  event_source_arn  = aws_dynamodb_table.messages_dynamo_table.stream_arn
+  starting_position = "TRIM_HORIZON"
+  #  Batching settings
+  #  For more details
+  #  https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html#aws-resource-lambda-eventsourcemapping-properties
   batch_size                         = 100
   bisect_batch_on_function_error     = true
   maximum_batching_window_in_seconds = 5
   maximum_retry_attempts             = 3
   destination_config {
     on_failure {
+      #      If a message is retired over 3 times it will be sent to this DLQ
       destination_arn = aws_sqs_queue.dynamo_stream_dlq.arn
     }
   }
+}
+
+# Self managed log group
+# This name matches our Lambda
+# Providing our own log group allows us to manage it
+resource "aws_cloudwatch_log_group" "api_gateway_lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.dynamo_stream_lambda.function_name}"
+  retention_in_days = 1
 }

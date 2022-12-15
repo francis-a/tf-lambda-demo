@@ -5,7 +5,7 @@ resource "aws_apigatewayv2_api" "api_gateway" {
 }
 
 # Define the integration between the Lambda and API
-# This configures API Gateway to the Lambda defined below
+# This configures API Gateway to the defined Lambda
 resource "aws_apigatewayv2_integration" "api_gateway_integration" {
   api_id                 = aws_apigatewayv2_api.api_gateway.id
   payload_format_version = "2.0"
@@ -13,7 +13,6 @@ resource "aws_apigatewayv2_integration" "api_gateway_integration" {
   integration_uri        = aws_lambda_function.api_gateway_lambda.invoke_arn
 }
 
-## Logs
 # These log groups will be created automatically by AWS
 # But managing them in Terraform will allow us to control properties such as the retention period
 resource "aws_cloudwatch_log_group" "api_access_logs" {
@@ -26,6 +25,7 @@ resource "aws_apigatewayv2_stage" "api_gateway_v1_stage" {
   name        = "v1"
   auto_deploy = "true"
   default_route_settings {
+    # default rate limiting settings applied to all routes
     detailed_metrics_enabled = true
     throttling_rate_limit    = 100
     throttling_burst_limit   = 100
@@ -58,11 +58,13 @@ resource "aws_apigatewayv2_stage" "api_gateway_v1_stage" {
   }
 }
 
-# routes
+# routes, these are matched in the ApiGatewayRequestHandler
 resource "aws_apigatewayv2_route" "api_post_message_route" {
   api_id    = aws_apigatewayv2_api.api_gateway.id
   route_key = "POST /message"
-  target    = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
+  #  Points to the integration defined above, this is what maps a route to a specific Lambda
+  #  If you wanted to point this route to a different Lambda you could make another integration
+  target = "integrations/${aws_apigatewayv2_integration.api_gateway_integration.id}"
 }
 
 resource "aws_apigatewayv2_route" "api_get_message_route" {

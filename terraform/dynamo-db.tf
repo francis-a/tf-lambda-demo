@@ -8,7 +8,7 @@ resource "aws_dynamodb_table" "messages_dynamo_table" {
     type = "S"
   }
 
-  stream_enabled   = true
+  stream_enabled = true
+  #  Create a stream that contains both the previous and current record
   stream_view_type = "NEW_AND_OLD_IMAGES"
-
 }

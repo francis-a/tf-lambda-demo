@@ -75,6 +75,8 @@ resource "aws_lambda_function" "api_gateway_lambda" {
 }
 
 # Self managed log group
+# This name matches our Lambda
+# Providing our own log group allows us to manage it
 resource "aws_cloudwatch_log_group" "api_gateway_lambda_logs" {
   name              = "/aws/lambda/${aws_lambda_function.api_gateway_lambda.function_name}"
   retention_in_days = 1
