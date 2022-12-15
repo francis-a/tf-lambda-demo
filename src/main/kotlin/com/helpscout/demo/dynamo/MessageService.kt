@@ -8,12 +8,15 @@ import com.amazonaws.services.lambda.runtime.events.transformers.v1.dynamodb.Dyn
 import com.helpscout.demo.ModifyMessageRequest
 import com.helpscout.demo.GetMessageResponse
 import com.helpscout.demo.StatusCodeException
+import mu.KLogging
 import java.util.UUID
 
 class MessageService(
     dynamoDB: AmazonDynamoDB,
     tableName: String
 ) {
+
+    companion object : KLogging()
 
     private val dynamoDBMapper = DynamoDBMapper(
         dynamoDB,
@@ -69,10 +72,11 @@ class MessageService(
         if (newImage.body == textToErrorOn) {
             // This failure will trigger a retry based off the settings in
             // dynamo_stream_event_mapping
-            throw StatusCodeException(statusCode = 500, error = "Whoops")
+            throw RuntimeException("Whoops")
         }
         val textToCheck = "Knock knock"
         if (oldImage.body != textToCheck && newImage.body == textToCheck) {
+            logger.info { "Message ${newImage.messageId} body changed from ${oldImage.body} to ${newImage.body}. Responding with \"Who's there?\"." }
             dynamoDBMapper.save(
                 DynamoDBMessage(
                     messageId = newImage.messageId,

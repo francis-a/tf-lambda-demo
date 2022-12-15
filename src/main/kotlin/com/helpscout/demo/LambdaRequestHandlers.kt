@@ -26,7 +26,7 @@ interface ServiceBootstrap {
  * Provides the default message service as a static var
  * This will avoid creating a new MessageService per Lambda invocation
  */
-object StaticServiceBootstrap: ServiceBootstrap {
+object StaticServiceBootstrap : ServiceBootstrap {
     @JvmStatic
     private val backingMessageService = MessageService(
         AmazonDynamoDBClient.builder().build(),
@@ -82,9 +82,11 @@ class ApiGatewayRequestHandler(
         "POST /message" -> 201 to messageService.saveMessage(
             modifyMessageRequest = toMessageRequest(this.body)
         )
+
         "GET /message/{messageId}" -> 200 to messageService.getMessage(
             messageId = this.pathParameters.getValue("messageId")
         )
+
         "PUT /message/{messageId}" -> 204 to messageService.updateMessage(
             messageId = this.pathParameters.getValue("messageId"),
             modifyMessageRequest = toMessageRequest(this.body)
@@ -133,6 +135,7 @@ class DynamoStreamRequestHandler(
     private val messageService = serviceBootstrap.messageService
 
     override fun handleRequest(input: DynamodbEvent, context: Context) = runCatching {
+        logger.info { "Handle DynamoDB event: $input" }
         input.records.mapNotNull {
             it.dynamodb.newAndOldImageAttributes()
         }.map { (new, old) ->
