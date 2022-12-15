@@ -104,7 +104,7 @@ resource "aws_lambda_event_source_mapping" "dynamo_stream_event_mapping" {
 # Self managed log group
 # This name matches our Lambda
 # Providing our own log group allows us to manage it
-#resource "aws_cloudwatch_log_group" "api_gateway_lambda_logs" {
-#  name              = "/aws/lambda/${aws_lambda_function.dynamo_stream_lambda.function_name}"
-#  retention_in_days = 1
-#}
+resource "aws_cloudwatch_log_group" "api_gateway_lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.dynamo_stream_lambda.function_name}"
+  retention_in_days = 1
+}
